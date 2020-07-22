@@ -1,4 +1,6 @@
-# Plugin Template
+# Traefik
 
-This Repository contains a templatate to base your plugin on.
-Please be aware: When submitting your plugin, this readme gets added to the Wiki
+Traefik is a leading modern reverse proxy and load balancer that makes deploying microservices easy
+
+**For more information about Traefik, please checkout:**
+https://containo.us/traefik/
