@@ -1,3 +1,6 @@
 #!/usr/local/bin/bash
+# This file contains an example update script to base your own jails on
 
-# This script is executed by Jailman after update and runs on the host
+initblueprint "$1"
+#TODO insert code to update itself here
+
