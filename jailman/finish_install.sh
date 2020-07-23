@@ -1,8 +1,8 @@
 #!/usr/local/bin/bash
 # This file contains the install script to install traefik as Jailman Reverse Proxy
 
-# init blueprint
-initblueprint "$1"
+# init plugin
+initplugin "$1"
 
 # Set default variable values
 iptmp=${ip4_addr%/*}
@@ -78,8 +78,8 @@ iocage exec "$1" service traefik start
 
 if [ -z "$dashboard" ] || [ "$dashboard" = "false" ];
 then
-	exitblueprint "${1}" "Traefik installed successfully, but you can not connect to the dashboard, as you had it disabled."
+	exitplugin "${1}" "Traefik installed successfully, but you can not connect to the dashboard, as you had it disabled."
 else
-	exitblueprint "${1}" "Traefik installed successfully, you can now connect to the traefik dashboard: https://${domain_name}"
+	exitplugin "${1}" "Traefik installed successfully, you can now connect to the traefik dashboard: https://${domain_name}"
 fi
 
