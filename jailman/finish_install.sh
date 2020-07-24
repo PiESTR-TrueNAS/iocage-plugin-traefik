@@ -85,7 +85,7 @@ then
       iocage exec "${link_influxdb}" "curl -XPOST -u ${influxdb_user}:${influxdb_password} http://"${link_influxdb_ip4_addr%/*}":8086/query --data-urlencode 'q=CREATE DATABASE ${influxdb_database}'"
       echo "Database ${influxdb_database} created with username ${influxdb_user} with password ${influxdb_password}."
      fi
-	cat "${includesdir}/metrics.conf" >> /mnt/"${global_dataset_config}"/"${1}"/traefik.toml
+	cat "${includes_dir}/metrics.conf" >> /mnt/"${global_dataset_config}"/"${1}"/traefik.toml
 	iocage exec "${1}" sed -i '' "s|INFLUXDBHOST|${link_influxdb_ip4_addr%/*}|" /config/traefik.toml
 	iocage exec "${1}" sed -i '' "s|INFLUXDBDB|${influxdb_database}|" /config/traefik.toml
 	iocage exec "${1}" sed -i '' "s|INFLUXDBUSER|${influxdb_user}|" /config/traefik.toml
