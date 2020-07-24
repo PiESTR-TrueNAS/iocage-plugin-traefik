@@ -5,8 +5,7 @@
 initplugin "$1"
 
 # Set default variable values
-iptmp=${ip4_addr%/*}
-domain_name="${domain_name:-$iptmp}"
+domain_name="${domain_name:-$jail_ip}"
 productionurl="https://acme-v02.api.letsencrypt.org/directory"
 stagingurl="https://acme-staging-v02.api.letsencrypt.org/directory"
 
@@ -29,7 +28,7 @@ else
 fi
 
 # Create DNS verification env-vars (as required by traefik)
-dnsenv=$(printenv | grep "jail_${1}_cert_env_" | grep -o 'env_.*' | cut -f2- -d_ | tr "\n" " "; echo)
+dnsenv=$(printenv | grep "${1}_cert_env_" | grep -o 'env_.*' | cut -f2- -d_ | tr "\n" " "; echo)
 iocage exec "$1" sysrc "traefik_env=${dnsenv}"
 
 # Replace placeholders with actual config
