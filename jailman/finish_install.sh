@@ -5,6 +5,8 @@
 initplugin "$1"
 
 # Set default variable values
+influxdb_database="${influxdb_database:-$1}"
+influxdb_user="${influxdb_user:-$influxdb_database}"
 domain_name="${domain_name:-$jail_ip}"
 productionurl="https://acme-v02.api.letsencrypt.org/directory"
 stagingurl="https://acme-staging-v02.api.letsencrypt.org/directory"
@@ -69,6 +71,29 @@ then
 else
 	echo "Dashboard set to on, enabling dashboard"
 	iocage exec "${1}" sed -i '' "s|dashplaceholder|true|" /config/traefik.toml
+fi
+if [ -n "${link_influxdb}" ]
+then
+  echo "Checking if the influxdb jail and database exist..."
+  if [[ -d "${global_dataset_iocage}"/jails/"${link_influxdb}" ]]; then
+    DB_EXISTING=$(iocage exec "${link_influxdb}" curl -G http://127.0.0.1:8086/query --data-urlencode 'q=SHOW DATABASES' | jq '.results [] | .series [] | .values []' | grep "${influxdb_database}" | sed 's/"//g' | sed 's/^ *//g' || echo "")
+    if [[ "$influxdb_database" == "$DB_EXISTING" ]]; then
+      echo "${link_influxdb} jail with database ${influxdb_database} already exists. Skipping database creation... "
+    else
+      echo "${link_influxdb} jail exists, but database ${influxdb_database} does not. Creating database ${influxdb_database}."
+      # shellcheck disable=SC2027,2086
+      iocage exec "${link_influxdb}" "curl -XPOST -u ${influxdb_user}:${influxdb_password} http://"${link_influxdb_ip4_addr%/*}":8086/query --data-urlencode 'q=CREATE DATABASE ${influxdb_database}'"
+      echo "Database ${influxdb_database} created with username ${influxdb_user} with password ${influxdb_password}."
+     fi
+	cat "${includesdir}/metrics.conf" >> /mnt/"${global_dataset_config}"/"${1}"/traefik.toml
+	iocage exec "${1}" sed -i '' "s|INFLUXDBHOST|${link_influxdb_ip4_addr%/*}|" /config/traefik.toml
+	iocage exec "${1}" sed -i '' "s|INFLUXDBDB|${influxdb_database}|" /config/traefik.toml
+	iocage exec "${1}" sed -i '' "s|INFLUXDBUSER|${influxdb_user}|" /config/traefik.toml
+	iocage exec "${1}" sed -i '' "s|INFLUXDBPASS|${influxdb_password}|" /config/traefik.toml
+  else
+    echo "Influxdb jail does not exist. Traefik metrics requires a Influxdb jail. Please install the Influxdb jail."
+    exit 1
+  fi
 fi
 
 # Start services
