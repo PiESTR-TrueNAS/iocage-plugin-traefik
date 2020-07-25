@@ -34,21 +34,46 @@ These settings are normally not required or normally used, but might come in han
 - cert_staging: Set this to "true" if you want to test it out using the Lets Encrypt staging server. Set it to "false" or (preferable) just leave it out to use the production server.
 - cert_wildcard_domain: If you want to generate wildcard certificates, please enter the domain name here, without `*.` (ex. `test.testdomain.com`)
 - cert_strict_sni: set to "true" to enable strict SNI checking, set to false or (preferably) just leave it out to disable strict-SNI checking.
-
+- link_influxdb: This links traefik to a influxdb jail to store metrics data (influxdb_password required)
+- influxdb_password: this sets up a password to use for the influxdb database
+- traefik_auth_basic: Add basic authentication to the traefik dashboard itself (if used on the traefik jail) or another jail (if used on another jail)
+- traefik_forward_auth: Add forwarded authentication to the traefik dashboard itself (if used on the traefik jail) or another jail (if used on another jail)
 
 ## Installing
 
-Just do the usual install procedures, like any other JailMan jail.
-If you have done it right, you can reach the Traefik admin dashboard using the domain_name you entered in the config file.
+To make traefik as easy as possible to install, we advice to base your config.yml settings on the following example:
+```
+traefikjail:
+  blueprint: traefik
+  ip4_addr: 192.168.1.200/24
+  gateway: 192.168.1.1
+  dashboard: true
+  traefik_auth_basic: user:password user2:pass2
+  domain_name: traefik.test.placeholder.net
+  dns_provider: cloudflare
+  cert_staging: true
+  cert_email: fake@email.net
+  cert_wildcard_domain: test.placeholder.net
+  # Please follow the guide here: https://docs.traefik.io/https/acme/
+  # and enter your DNS providers environment variables below (2 spaces indent) of cert_env
+  cert_env:
+    CF_API_EMAIL: fake@email.adress
+    CF_API_KEY: ftyhsfgufsgusfgjhsfghjsgfhj
+  link_influxdb: influxdbjail
+  influxdb_password: traefikmetricspass
+```
+
 
 ## Usages
 
-To add a jail to traefik, just add the following config parameter to the other jail (not traefik), where $traefikjail is the name of your traefik-jail:
+To add a jail to traefik, you will need a domain name (which can be accessed using the cert_env settings on traefik).
+If you have the domain name configured correctly on traefik, just add the following config parameter to the other jail (not traefik), where $traefikjail is the name of your traefik-jail:
 ```
+  domain_name: myjail.test.com
   traefik_proxy: $traefikjail
-
 ```
 
+## Security
 
 If you want to add security to a jail, there are two opions: basic_auth or forward_auth.
 **basic_auth:**
