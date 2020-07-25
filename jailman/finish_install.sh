@@ -72,6 +72,7 @@ else
 	echo "Dashboard set to on, enabling dashboard"
 	iocage exec "${1}" sed -i '' "s|dashplaceholder|true|" /config/traefik.toml
 fi
+
 if [ -n "${link_influxdb}" ]
 then
   echo "Checking if the influxdb jail and database exist..."
@@ -84,7 +85,7 @@ then
       # shellcheck disable=SC2027,2086
       iocage exec "${link_influxdb}" "curl -XPOST -u ${influxdb_user}:${influxdb_password} http://"${link_influxdb_ip4_addr%/*}":8086/query --data-urlencode 'q=CREATE DATABASE ${influxdb_database}'"
       echo "Database ${influxdb_database} created with username ${influxdb_user} with password ${influxdb_password}."
-     fi
+    fi
 	cat "${includes_dir}/metrics.conf" >> /mnt/"${global_dataset_config}"/"${1}"/traefik.toml
 	iocage exec "${1}" sed -i '' "s|INFLUXDBHOST|${link_influxdb_ip4_addr%/*}|" /config/traefik.toml
 	iocage exec "${1}" sed -i '' "s|INFLUXDBDB|${influxdb_database}|" /config/traefik.toml

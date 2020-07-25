@@ -9,6 +9,7 @@
           rule = "Host(`placeholderdashboardhost`)"
           service = "api@internal"
           entryPoints = ["web-secure"]
+		  middlewares = ["retry"]
         [http.routers.traefik.tls]
           certResolver = "default" # From static configuration
           [[http.routers.traefik.tls.domains]]
