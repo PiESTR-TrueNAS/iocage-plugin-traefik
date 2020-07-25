@@ -23,10 +23,10 @@ cp "${includes_dir}"/buildin_middlewares.toml /mnt/"${global_dataset_config}"/"$
 if [ -z "$cert_wildcard_domain" ];
 then
 	echo "wildcard not set, using non-wildcard config..."
-	cp "${includes_dir}"/dashboard.toml /mnt/"${global_dataset_config}"/"${1}"/dynamic/dashboard.toml
+	cp "${includes_dir}"/dashboard.toml /mnt/"${global_dataset_config}"/"${1}"/dynamic/${1}.toml
 else
 	echo "wildcard set, using wildcard config..."
-	cp "${includes_dir}"/dashboard_wildcard.toml /mnt/"${global_dataset_config}"/"${1}"/dynamic/dashboard.toml
+	cp "${includes_dir}"/dashboard_wildcard.toml /mnt/"${global_dataset_config}"/"${1}"/dynamic/${1}.toml
 fi
 
 # Create DNS verification env-vars (as required by traefik)
@@ -36,7 +36,7 @@ iocage exec "$1" sysrc "traefik_env=${dnsenv}"
 # Replace placeholders with actual config
 iocage exec "${1}" sed -i '' "s|placeholderemail|${cert_email}|" /config/traefik.toml
 iocage exec "${1}" sed -i '' "s|placeholderprovider|${dns_provider}|" /config/traefik.toml
-iocage exec "${1}" sed -i '' "s|placeholderdashboardhost|${domain_name}|" /config/dynamic/dashboard.toml
+iocage exec "${1}" sed -i '' "s|placeholderdashboardhost|${domain_name}|" /config/dynamic/${1}.toml
 iocage exec "${1}" chown -R traefik:traefik /config
 
 if [ -z "$cert_wildcard_domain" ];
@@ -44,7 +44,7 @@ then
 	echo "wildcard not set, not enabling wildcard config..."
 else
 	echo "wildcard set, enabling wildcard config..."
-	iocage exec "${1}" sed -i '' "s|placeholderwildcard|${cert_wildcard_domain}|" /config/dynamic/dashboard.toml
+	iocage exec "${1}" sed -i '' "s|placeholderwildcard|${cert_wildcard_domain}|" /config/dynamic/${1}.toml
 fi
 
 if [ -z "$cert_staging" ] || [ "$cert_staging" = "false" ];
