@@ -43,7 +43,27 @@ If you have done it right, you can reach the Traefik admin dashboard using the d
 
 ## Usages
 
-Currently we haven't migrated all jails to sit behind the traefik reverse proxy yet. We also didn't add security for the dashboard yet.
-Thus it is currently not usable out of the box, although the Traefik installation is fully configured.
+To add a jail to traefik, just add the following config parameter to the other jail (not traefik), where $traefikjail is the name of your traefik-jail:
+```
+  traefik_proxy: $traefikjail
+
+```
+
+
+If you want to add security to a jail, there are two opions: basic_auth or forward_auth.
+**basic_auth:**
+Basic_auth uses a simpel username and passowrd prompt before it allows anyone to open the site. It can be enabled by adding the following config parameter in addition to traefik_proxy.
+```
+  traefik_basic_auth: user1:password1 user2:password2
+
+```
+
+**forward_auth:**
+forward_auth checks if you already have access (http not-403) to another website. It's more advanced to setup, but it (for example) enables you to easily add central authentication to jails using organizr.
+The following is an example config, using an organizr jail. It needs to be added in addition to traefik_proxy:
+```
+  traefik_auth_forward: https://organizr.testdomain.com/api/?v1/auth&group=1
+
+```
 
 Although the web interface shows port 9080 and 9443, Traefik is actually also listening on the (more common) port 80 and 443, also known as normal (without port in the URL) http and https ports.
